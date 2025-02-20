@@ -19,7 +19,7 @@ func main() {
 	}
 	defer connection.Close()
 
-	log.Println("connection successfull to amqp")
+	log.Println("server connection successfull to amqp")
 	amqpChan, err := connection.Channel()
 	if err != nil {
 		log.Fatal(err)
