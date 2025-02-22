@@ -39,7 +39,7 @@ func subscribes(connection *amqp.Connection, gs *gamelogic.GameState, amqpChan *
 	err = pubsub.SubscribeJson(
 		connection,
 		routing.ExchangePerilTopic,
-		"war",
+		routing.WarRecognitionsPrefix,
 		fmt.Sprintf("%s.*", routing.WarRecognitionsPrefix),
 		pubsub.Durable,
 		handleWar(gs),
