@@ -2,8 +2,6 @@ package main
 
 import (
 	"log"
-	// "os"
-	// "os/signal"
 
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/gamelogic"
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/pubsub"
@@ -28,6 +26,17 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	_,_, err = pubsub.DeclareAndBind(
+		connection,
+		routing.ExchangePerilTopic,
+		routing.GameLogSlug,
+		routing.GameLogSlug + ".*",
+		1,
+	 )
+	 if err != nil {
+		log.Fatal(err)
+	 }
 
 
 	gamelogic.PrintServerHelp()
