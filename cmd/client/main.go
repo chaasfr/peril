@@ -42,13 +42,12 @@ func main() {
 	gamelogic.PrintClientHelp()
 	gameState := gamelogic.NewGameState(username)
 
-	subscribes(connection, gameState)
-
 	amqpChan, err := connection.Channel()
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	subscribes(connection, gameState, amqpChan)
 	repl(gameState, amqpChan)
 	
 	log.Println("shutting down")

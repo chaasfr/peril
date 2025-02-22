@@ -11,7 +11,7 @@ import (
 )
 
 
-func subscribes(connection *amqp.Connection, gs *gamelogic.GameState) {
+func subscribes(connection *amqp.Connection, gs *gamelogic.GameState, amqpChan *amqp.Channel) {
 	err := pubsub.SubscribeJson(
 		connection,
 		routing.ExchangePerilDirect,
@@ -30,9 +30,21 @@ func subscribes(connection *amqp.Connection, gs *gamelogic.GameState) {
 		fmt.Sprintf("%s.%s", routing.ArmyMovesPrefix, gs.Player.Username),
 		fmt.Sprintf("%s.*",routing.ArmyMovesPrefix),
 		pubsub.Transient,
-		handleMove(gs),
+		handleMove(gs, amqpChan),
 	 )
 	 if err != nil {
+		log.Fatal(err)
+	}
+
+	err = pubsub.SubscribeJson(
+		connection,
+		routing.ExchangePerilTopic,
+		"war",
+		fmt.Sprintf("%s.*", routing.WarRecognitionsPrefix),
+		pubsub.Durable,
+		handleWar(gs),
+	)
+	if err != nil {
 		log.Fatal(err)
 	}
 }
