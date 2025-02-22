@@ -37,64 +37,20 @@ func main() {
 	 if err != nil {
 		log.Fatal(err)
 	 }
+	 
 
 	gamelogic.PrintClientHelp()
 	gameState := gamelogic.NewGameState(username)
 
-	err = pubsub.SubscribeJson(
-		connection,
-		routing.ExchangePerilDirect,
-		fmt.Sprintf("pause.%s", username),
-		routing.PauseKey,
-		pubsub.Transient,
-		handlerPause(gameState),
-	)
+	subscribes(connection, gameState)
+
+	amqpChan, err := connection.Channel()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	repl(gameState)
+	repl(gameState, amqpChan)
 	
 	log.Println("shutting down")
 	connection.Close()
-}
-
-
-func repl(gameState *gamelogic.GameState) {
-	stop := false
-	for {
-		if stop {
-			break
-		}
-
-		words := gamelogic.GetInput()
-		if len(words) == 0 {
-			continue
-		}
-		switch(words[0]) {
-		case "spawn":
-			err := gameState.CommandSpawn(words)
-			if err != nil {
-				log.Println(err)
-			}
-		case "move":
-			_, err := gameState.CommandMove(words)
-			if err == nil {
-				log.Println("move successful")
-			} else {
-				log.Println(err)
-			}
-		case "status":
-			gameState.CommandStatus()
-		case "help":
-			gamelogic.PrintClientHelp()
-		case "spam":
-			log.Println("Spamming not allowed yet!")
-		case "quit":
-			gamelogic.PrintQuit()
-			stop = true
-		default:
-			log.Println("unknown command.")
-		}
-	}
 }
