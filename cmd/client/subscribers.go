@@ -42,7 +42,7 @@ func subscribes(connection *amqp.Connection, gs *gamelogic.GameState, amqpChan *
 		routing.WarRecognitionsPrefix,
 		fmt.Sprintf("%s.*", routing.WarRecognitionsPrefix),
 		pubsub.Durable,
-		handleWar(gs),
+		handleWar(gs, amqpChan),
 	)
 	if err != nil {
 		log.Fatal(err)

@@ -1,7 +1,9 @@
 package pubsub
 
 import (
+	"bytes"
 	"context"
+	"encoding/gob"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -89,13 +91,10 @@ func ackmessage(ackType AckType, msg *amqp.Delivery) error {
 	switch(ackType){
 	case Ack:
 		err = msg.Ack(false)
-		log.Println("message Acked")
 	case NackRequeue:
 		err = msg.Nack(false, true)
-		log.Println("message Nacked and requeued")
 	case NackDiscard:
 		err = msg.Nack(false, false)
-		log.Println("message Nacked and discarded")
 	default:
 		err = fmt.Errorf("unknown acktype")
 	}
@@ -133,3 +132,23 @@ func DeclareAndBind(
 	return amqpChan, &q, nil
 }
 
+
+func PublishGob[T any](ch *amqp.Channel, exchange, key string, val T) error {
+	var buf bytes.Buffer
+	gobEncoder := gob.NewEncoder(&buf)
+
+	if err := gobEncoder.Encode(val); err != nil {
+		return err
+	}
+	ch.PublishWithContext(
+		context.Background(),
+		exchange, key,
+		false,
+		false,
+		amqp.Publishing{
+			ContentType: "aplication/gob",
+			Body: buf.Bytes(),
+		})
+	
+	return nil
+	}
