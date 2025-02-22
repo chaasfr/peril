@@ -40,6 +40,27 @@ func main() {
 
 	gamelogic.PrintClientHelp()
 	gameState := gamelogic.NewGameState(username)
+
+	err = pubsub.SubscribeJson(
+		connection,
+		routing.ExchangePerilDirect,
+		fmt.Sprintf("pause.%s", username),
+		routing.PauseKey,
+		pubsub.Transient,
+		handlerPause(gameState),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	repl(gameState)
+	
+	log.Println("shutting down")
+	connection.Close()
+}
+
+
+func repl(gameState *gamelogic.GameState) {
 	stop := false
 	for {
 		if stop {
@@ -52,12 +73,12 @@ func main() {
 		}
 		switch(words[0]) {
 		case "spawn":
-			err = gameState.CommandSpawn(words)
+			err := gameState.CommandSpawn(words)
 			if err != nil {
 				log.Println(err)
 			}
 		case "move":
-			_, err = gameState.CommandMove(words)
+			_, err := gameState.CommandMove(words)
 			if err == nil {
 				log.Println("move successful")
 			} else {
@@ -76,6 +97,4 @@ func main() {
 			log.Println("unknown command.")
 		}
 	}
-	log.Println("shutting down")
-	connection.Close()
 }

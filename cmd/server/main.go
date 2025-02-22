@@ -71,7 +71,7 @@ func main() {
 			log.Println("exiting")
 			stop = true
 		default:
-			log.Println("I donùt understand this command")
+			log.Println("I don't understand this command")
 		}
 	}
 
