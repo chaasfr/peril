@@ -3,6 +3,7 @@ package pubsub
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -12,6 +13,13 @@ type SimpleQueueType int
 const (
 	Transient SimpleQueueType = iota
 	Durable
+)
+
+type AckType int
+const (
+	Ack AckType = iota
+	NackRequeue
+	NackDiscard
 )
 
 var SimpleQueueTypeName = map[SimpleQueueType]string{
@@ -43,7 +51,7 @@ func SubscribeJson[T any](
 	queueName,
 	key string,
 	simpleQueueType SimpleQueueType,
-	handler func(T),
+	handler func(T) AckType,
 ) error {
 	amqpChan, amqpQ, err := DeclareAndBind(conn, exchange, queueName, key, simpleQueueType)
 	if err != nil {
@@ -63,8 +71,8 @@ func SubscribeJson[T any](
 					log.Println(err)
 					return err
 				}
-				handler(obj)
-				err = msg.Ack(false)
+				ackType := handler(obj)
+				err = ackmessage(ackType, &msg)
 				if err != nil {
 					log.Println(err)
 					return err
@@ -76,6 +84,23 @@ func SubscribeJson[T any](
 	return nil
 }
 
+func ackmessage(ackType AckType, msg *amqp.Delivery) error {
+	var err error
+	switch(ackType){
+	case Ack:
+		err = msg.Ack(false)
+		log.Println("message Acked")
+	case NackRequeue:
+		err = msg.Nack(false, true)
+		log.Println("message Nacked and requeued")
+	case NackDiscard:
+		err = msg.Nack(false, false)
+		log.Println("message Nacked and discarded")
+	default:
+		err = fmt.Errorf("unknown acktype")
+	}
+	return err
+}
 
 func DeclareAndBind(
 	conn *amqp.Connection,
