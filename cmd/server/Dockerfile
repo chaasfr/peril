@@ -1,5 +1,5 @@
 # Use the official Golang image to build the Go binary
-FROM golang:1.20 as builder
+FROM golang:1.20 AS builder
 
 # Set the Current Working Directory inside the container
 WORKDIR /app
