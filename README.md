@@ -4,7 +4,7 @@ playing around with rabbitMQ
 
 ### ToDo list
 - dockerise server and clients
-- CICD
+- CD
 - proper readme
 - unit-test repl
 - automated created of exchanges and gamelog queue
