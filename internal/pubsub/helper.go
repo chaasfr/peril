@@ -176,6 +176,7 @@ func Subscribe[T any](
 		return err
 	}
 
+	amqpChan.Qos(10,0,false) //limit prefetch to 10 messages for this chan
 	deliveryChan, err := amqpChan.Consume(amqpQ.Name, "", false, false, false, false, nil)
 	if err != nil {
 		return err
