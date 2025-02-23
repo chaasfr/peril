@@ -33,7 +33,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/peril/server:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/peril-server:latest
           push: true
 
   build-client-binary: # This job builds the client binary but does not publish it anywhere yet
