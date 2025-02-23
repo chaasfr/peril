@@ -22,22 +22,21 @@ func main() {
 
 	log.Println("connection successfull to amqp")
 
-	 username, err := gamelogic.ClientWelcome()
-	 if err != nil {
+	username, err := gamelogic.ClientWelcome()
+	if err != nil {
 		log.Fatal(err)
-	 }
+	}
 
-	 _,_, err = pubsub.DeclareAndBind(
+	_, _, err = pubsub.DeclareAndBind(
 		connection,
 		routing.ExchangePerilDirect,
-		fmt.Sprintf("pause.%s",username),
+		fmt.Sprintf("pause.%s", username),
 		routing.PauseKey,
 		0,
-	 )
-	 if err != nil {
+	)
+	if err != nil {
 		log.Fatal(err)
-	 }
-	 
+	}
 
 	gamelogic.PrintClientHelp()
 	gameState := gamelogic.NewGameState(username)
@@ -49,7 +48,10 @@ func main() {
 
 	subscribes(connection, gameState, amqpChan)
 	repl(gameState, amqpChan)
-	
+
 	log.Println("shutting down")
-	connection.Close()
+	err = connection.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
 }

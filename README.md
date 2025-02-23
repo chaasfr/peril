@@ -9,8 +9,9 @@ playing around with rabbitMQ
 - unit-test repl
 - automated created of exchanges and gamelog queue
 
-# How to setup
-- install go & rabbitMQ
+# How to install
+- install go 
+- install rabbitMQ CLI `sudo apt install rabbitmq-server`
 
 ## How to start
 - run `rabbit.sh start`

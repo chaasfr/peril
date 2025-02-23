@@ -10,7 +10,6 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-
 func subscribes(connection *amqp.Connection, gs *gamelogic.GameState, amqpChan *amqp.Channel) {
 	err := pubsub.SubscribeJson(
 		connection,
@@ -24,15 +23,15 @@ func subscribes(connection *amqp.Connection, gs *gamelogic.GameState, amqpChan *
 		log.Fatal(err)
 	}
 
-	 err = pubsub.SubscribeJson(
+	err = pubsub.SubscribeJson(
 		connection,
 		routing.ExchangePerilTopic,
 		fmt.Sprintf("%s.%s", routing.ArmyMovesPrefix, gs.Player.Username),
-		fmt.Sprintf("%s.*",routing.ArmyMovesPrefix),
+		fmt.Sprintf("%s.*", routing.ArmyMovesPrefix),
 		pubsub.Transient,
 		handleMove(gs, amqpChan),
-	 )
-	 if err != nil {
+	)
+	if err != nil {
 		log.Fatal(err)
 	}
 

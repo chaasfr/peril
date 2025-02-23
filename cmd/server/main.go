@@ -9,8 +9,6 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-
-
 func main() {
 	log.Println("Starting Peril server...")
 	connectionString := "amqp://guest:guest@localhost:5672/"
@@ -27,18 +25,17 @@ func main() {
 		log.Fatal(err)
 	}
 
-	 err = pubsub.SubscribeGob(
+	err = pubsub.SubscribeGob(
 		connection,
 		routing.ExchangePerilTopic,
 		routing.GameLogSlug,
-		routing.GameLogSlug + ".*",
+		routing.GameLogSlug+".*",
 		pubsub.Durable,
 		handleLog(),
-	 )
-	 if err != nil {
+	)
+	if err != nil {
 		log.Fatal(err)
-	 }
-
+	}
 
 	gamelogic.PrintServerHelp()
 	stop := false
@@ -51,23 +48,29 @@ func main() {
 		if len(words) == 0 {
 			continue
 		}
-		switch(words[0]) {
+		switch words[0] {
 		case "pause":
 			log.Println("sending a pause message")
-			pubsub.PublishJSON(
+			err = pubsub.PublishJSON(
 				amqpChan,
 				routing.ExchangePerilDirect,
 				routing.PauseKey,
 				routing.PlayingState{IsPaused: true},
 			)
+			if err != nil {
+				log.Fatal(err)
+			}
 		case "resume":
 			log.Println("sending a resume message")
-			pubsub.PublishJSON(
+			err = pubsub.PublishJSON(
 				amqpChan,
 				routing.ExchangePerilDirect,
 				routing.PauseKey,
 				routing.PlayingState{IsPaused: false},
 			)
+			if err != nil {
+				log.Fatal(err)
+			}
 		case "quit":
 			log.Println("exiting")
 			stop = true
@@ -75,5 +78,5 @@ func main() {
 			log.Println("I don't understand this command")
 		}
 	}
-	
+
 }
