@@ -23,7 +23,8 @@ jobs:
       - name: Build and push Docker image for server
         uses: docker/build-push-action@v4
         with:
-          context: ./cmd/server
+          file: ./cmd/server/Dockerfile
+          context: .
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/peril/server:latest
           push: true
 
