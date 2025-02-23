@@ -2,9 +2,11 @@ package gamelogic
 
 import (
 	"bufio"
+	"crypto/rand"
 	"errors"
 	"fmt"
-	"math/rand"
+	"log"
+	"math/big"
 	"os"
 	"strings"
 )
@@ -67,7 +69,11 @@ func GetMaliciousLog() string {
 		"The art of war is simple enough. Find out where your enemy is. Get at him as soon as you can. Strike him as hard as you can, and keep moving on.",
 		"All warfare is based on deception.",
 	}
-	randomIndex := rand.Intn(len(possibleLogs))
+	nBig, err := rand.Int(rand.Reader, big.NewInt(int64(len(possibleLogs))))
+	if err != nil {
+		log.Fatal(err)
+	}
+	randomIndex := int(nBig.Int64())
 	msg := possibleLogs[randomIndex]
 	return msg
 }
