@@ -47,45 +47,6 @@ ch.PublishWithContext(
 return nil
 }
 
-func SubscribeJson[T any](
-	conn * amqp.Connection,
-	exchange,
-	queueName,
-	key string,
-	simpleQueueType SimpleQueueType,
-	handler func(T) AckType,
-) error {
-	amqpChan, amqpQ, err := DeclareAndBind(conn, exchange, queueName, key, simpleQueueType)
-	if err != nil {
-		return err
-	}
-
-	deliveryChan, err := amqpChan.Consume(amqpQ.Name, "", false, false, false, false, nil)
-	if err != nil {
-		return err
-	}
-
-	go func() error {
-			for msg := range deliveryChan {
-				var obj T
-				err := json.Unmarshal(msg.Body, &obj)
-				if err != nil {
-					log.Println(err)
-					return err
-				}
-				ackType := handler(obj)
-				err = ackmessage(ackType, &msg)
-				if err != nil {
-					log.Println(err)
-					return err
-				}
-		}
-		return nil
-	}()
-
-	return nil
-}
-
 func ackmessage(ackType AckType, msg *amqp.Delivery) error {
 	var err error
 	switch(ackType){
@@ -150,5 +111,92 @@ func PublishGob[T any](ch *amqp.Channel, exchange, key string, val T) error {
 			Body: buf.Bytes(),
 		})
 	
+	return nil
+	}
+
+
+func SubscribeJson[T any](
+		conn * amqp.Connection,
+		exchange,
+		queueName,
+		key string,
+		simpleQueueType SimpleQueueType,
+		handler func(T) AckType,
+	) error {
+		unmarshaller := func(msgBody []byte) (T,error) {
+			var obj T
+			buffer := bytes.NewBuffer(msgBody)
+			decoderJson := json.NewDecoder(buffer)
+			err := decoderJson.Decode(&obj)
+			return obj, err
+		}
+		err := Subscribe(conn, exchange, queueName, key, simpleQueueType, handler, unmarshaller)
+		if err != nil {
+			log.Fatal(err)
+		}
+	
+	return nil
+}
+
+func SubscribeGob[T any](
+		conn * amqp.Connection,
+		exchange,
+		queueName,
+		key string,
+		simpleQueueType SimpleQueueType,
+		handler func(T) AckType,
+	) error {
+		unmarshaller := func(msgBody []byte) (T,error) {
+			var obj T
+			buffer := bytes.NewBuffer(msgBody)
+			decoderGob := gob.NewDecoder(buffer)
+			err := decoderGob.Decode(&obj)
+			return obj, err
+		}
+		err := Subscribe(conn, exchange, queueName, key, simpleQueueType, handler, unmarshaller)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+	return nil
+	}
+
+
+func Subscribe[T any](
+		conn * amqp.Connection,
+		exchange,
+		queueName,
+		key string,
+		simpleQueueType SimpleQueueType,
+		handler func(T) AckType,
+		unmarshaller func([]byte) (T, error),
+	) error {
+		amqpChan, amqpQ, err := DeclareAndBind(conn, exchange, queueName, key, simpleQueueType)
+	if err != nil {
+		return err
+	}
+
+	deliveryChan, err := amqpChan.Consume(amqpQ.Name, "", false, false, false, false, nil)
+	if err != nil {
+		return err
+	}
+
+	go func() error {
+			for msg := range deliveryChan {
+				obj, err := unmarshaller(msg.Body)
+				if err != nil {
+					log.Println(err)
+					return err
+				}
+				ackType := handler(obj)
+				err = ackmessage(ackType, &msg)
+				if err != nil {
+					log.Println(err)
+					return err
+				}
+		}
+		return nil
+	}()
+
 	return nil
 	}

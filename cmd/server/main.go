@@ -27,12 +27,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	_,_, err = pubsub.DeclareAndBind(
+	 err = pubsub.SubscribeGob(
 		connection,
 		routing.ExchangePerilTopic,
 		routing.GameLogSlug,
 		routing.GameLogSlug + ".*",
-		1,
+		pubsub.Durable,
+		handleLog(),
 	 )
 	 if err != nil {
 		log.Fatal(err)
@@ -74,13 +75,5 @@ func main() {
 			log.Println("I don't understand this command")
 		}
 	}
-
-
-	// // wait for ctrl+c
-	// signalChan := make(chan os.Signal, 1)
-	// signal.Notify(signalChan, os.Interrupt)
-	// <-signalChan 
-	// log.Println("shutting down")
-	// connection.Close()
 	
 }
