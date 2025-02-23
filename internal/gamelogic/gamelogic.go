@@ -71,7 +71,7 @@ func GetMaliciousLog() string {
 	}
 	nBig, err := rand.Int(rand.Reader, big.NewInt(int64(len(possibleLogs))))
 	if err != nil {
-			log.Fatal(err)
+		log.Fatal(err)
 	}
 	randomIndex := int(nBig.Int64())
 	msg := possibleLogs[randomIndex]
