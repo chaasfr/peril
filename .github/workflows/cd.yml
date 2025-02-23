@@ -23,9 +23,8 @@ jobs:
       - name: Build and push Docker image for server
         uses: docker/build-push-action@v4
         with:
-          context: ./server
-          dockerfile: ./server/Dockerfile
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/server:latest
+          context: ./cmd/server
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/peril/server:latest
           push: true
 
   build-client-binary: # This job builds the client binary but does not publish it anywhere yet
