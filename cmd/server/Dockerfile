@@ -1,9 +1,6 @@
 # Use the official Golang image to build the Go binary
 FROM golang:1.20 AS builder
 
-# Set the Current Working Directory inside the container
-WORKDIR /app
-
 RUN echo "PWD is $PWD"
 
 RUN ls -la
@@ -22,9 +19,6 @@ RUN go build -o server ./cmd/server
 
 # Use a minimal image to run the Go binary
 FROM alpine:latest
-
-# Set the Current Working Directory inside the container
-WORKDIR /root/
 
 # Copy the pre-built binary file from the builder stage
 COPY --from=builder /app/server .
