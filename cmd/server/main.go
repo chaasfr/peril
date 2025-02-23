@@ -3,9 +3,9 @@ package main
 import (
 	"log"
 
-	"github.com/bootdotdev/learn-pub-sub-starter/internal/gamelogic"
-	"github.com/bootdotdev/learn-pub-sub-starter/internal/pubsub"
-	"github.com/bootdotdev/learn-pub-sub-starter/internal/routing"
+	"github.com/chaasfr/peril/internal/gamelogic"
+	"github.com/chaasfr/peril/internal/pubsub"
+	"github.com/chaasfr/peril/internal/routing"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
